@@ -1,20 +1,25 @@
-FROM python:3.11-slim  
-WORKDIR /main          # Stel de werkdirectory in
+# Gebruik een lichtgewicht Python-image
+FROM python:3.11-slim
 
-# Kopieer de vereiste bestanden naar de container
-COPY ./organized_server_script_v2.6.py /main/
-COPY ./requirements.txt /main/
-COPY ./models /main/models
-COPY ./static /main/static
-COPY ./templates /main/templates
-
-# Installeer systeemafhankelijkheden en Python-pakketten
-RUN apt-get update \
-    && apt-get install -y \
+# Installeer systeemafhankelijkheden
+RUN apt-get update && apt-get install -y \
     build-essential \
     libgomp1 \
-    && apt-get clean \
-    && pip install --no-cache-dir -r /main/requirements.txt
+    && apt-get clean
+
+# Stel de werkdirectory in
+WORKDIR /app
+
+# Kopieer de vereiste bestanden naar de container
+COPY ./requirements.txt /app/
+COPY ./organized_server_script_v2.6.py /app/
+COPY ./models /app/models/
+COPY ./static /app/static/
+COPY ./templates /app/templates/
+COPY ./historical_weather_data.csv /app/
+
+# Installeer Python-afhankelijkheden
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Stel het startcommando in
-CMD ["python", "/main/organized_server_script_v2.6.py"]
+CMD ["python", "/app/organized_server_script_v2.6.py"]

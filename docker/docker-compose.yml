@@ -3,8 +3,8 @@ networks:
     external: true
 services:
   philander-weerapp:
-    image: python:3.11-slim
-    container_name: philander_weerapp:V1
+    image: philander_weerapp:V1
+    container_name: philander-weer
     working_dir: /app
     volumes:
       - ../:/app  # Mount de projectmap in de container

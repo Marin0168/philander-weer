@@ -1,14 +1,20 @@
-# Basis image met Python
+# Basis Python-image
 FROM python:3.11-slim
 
-# Stel de werkdirectory in binnen de container
+# Installeer systeemafhankelijkheden voor LightGBM
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libgomp1 \
+    && apt-get clean
+
+# Stel de werkdirectory in
 WORKDIR /app
 
-# Kopieer je projectbestanden naar de container
-COPY ./ /app
+# Kopieer de projectbestanden naar de container
+COPY ../ /app
 
-# Installeer vereisten vanuit requirements.txt
+# Installeer Python-pakketten
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Stel de standaard opdracht in om het script te draaien
+# Stel het startcommando in
 CMD ["python", "organized_server_script_v2.6.py"]

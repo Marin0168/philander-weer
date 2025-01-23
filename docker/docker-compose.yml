@@ -5,8 +5,6 @@ services:
     build:
       context: ..
     container_name: philander_weerapp
-    ports:
-      - "5000:5000"
     environment:
       - WEATHER_API_KEY=your_api_key
     volumes:

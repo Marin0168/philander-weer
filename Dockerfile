@@ -1,20 +1,22 @@
-# Basis Python-image
-FROM python:3.11-slim
+FROM python:3.11-slim  
+WORKDIR /main          # Stel de werkdirectory in
 
-# Installeer systeemafhankelijkheden voor LightGBM
-RUN apt-get update && apt-get install -y \
-    gcc \
+# Kopieer de vereiste bestanden naar de container
+COPY ./organized_server_script_v2.6.py /main/
+COPY ./requirements.txt /main/
+COPY ./models /main/models
+COPY ./static /main/static
+COPY ./templates /main/templates
+COPY ./historical_weather_data /main/historical_weather_data
+COPY ./organized_server_script_v2 /main/organized_server_script_v2
+
+# Installeer systeemafhankelijkheden en Python-pakketten
+RUN apt-get update \
+    && apt-get install -y \
+    build-essential \
     libgomp1 \
-    && apt-get clean
-
-# Stel de werkdirectory in
-WORKDIR /app
-
-# Kopieer de projectbestanden naar de container
-COPY ../ /app
-
-# Installeer Python-pakketten
-RUN pip install --no-cache-dir -r requirements.txt
+    && apt-get clean \
+    && pip install --no-cache-dir -r /main/requirements.txt
 
 # Stel het startcommando in
-CMD ["python", "organized_server_script_v2.6.py"]
+CMD ["python", "/main/organized_server_script_v2.6.py"]

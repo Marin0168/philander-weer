@@ -7,8 +7,6 @@ COPY ./requirements.txt /main/
 COPY ./models /main/models
 COPY ./static /main/static
 COPY ./templates /main/templates
-COPY ./historical_weather_data /main/historical_weather_data
-COPY ./organized_server_script_v2 /main/organized_server_script_v2
 
 # Installeer systeemafhankelijkheden en Python-pakketten
 RUN apt-get update \

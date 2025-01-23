@@ -1,3 +1,4 @@
+lightgbm
 joblib
 requests
 pandas

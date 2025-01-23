@@ -1,14 +1,14 @@
-networks:
-  dockernet:
-    external: true
+version: '3.8'
+
 services:
   philander-weerapp:
-    image: philander_weerapp:V1
-    container_name: philander_weerapp:V1
-    working_dir: /app
-    volumes:
-      - ../:/app  # Mount de projectmap in de container
+    build:
+      context: ..
+    container_name: philander_weerapp
+    ports:
+      - "5000:5000"
     environment:
-      - WEATHER_API_KEY=your_api_key  # Voeg je API-sleutel hier toe
+      - WEATHER_API_KEY=your_api_key
+    volumes:
+      - ../:/app
     command: python organized_server_script_v2.6.py
-

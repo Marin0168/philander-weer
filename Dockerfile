@@ -4,9 +4,6 @@ FROM python:3.11-slim
 # Stel de werkdirectory in binnen de container
 WORKDIR /app
 
-COPY ./app /main/app
-COPY ./public /main/public
-
 # Kopieer je projectbestanden naar de container
 COPY ./ /app
 

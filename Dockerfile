@@ -5,6 +5,9 @@ WORKDIR /app
 
 # Kopieer de requirements file naar de container
 COPY requirements.txt /app/requirements.txt
+COPY ./models /app/models
+COPY ./static /app/static
+COPY ./templates /app/templates
 
 # Installeer afhankelijkheden
 RUN pip install --no-cache-dir -r requirements.txt

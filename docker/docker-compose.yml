@@ -1,16 +1,12 @@
+networks:
+  dockernet:
+    external: true
 services:
   philander-weerapp:
-    build:
-      context: .. # Ga één niveau omhoog naar de projectroot
-      dockerfile: ./Dockerfile
-    container_name: philander_weerapp
-    ports:
-      - "5000:5000"  # Flask-app draait op poort 5000
-    volumes:
-      - ../models:/app/models  # Zorg dat modellen direct beschikbaar zijn
-      - ../static:/app/static
-      - ../templates:/app/templates
-      - ../historical_weather_data.csv:/app/historical_weather_data.csv
-      - ../organized_server_script_v2.6.py:/app/organized_server_script_v2.6.py
+    image: philander-weerapp:V1
+    container_name: philander-weerapp
+    networks:
+      - dockernet
+    restart: unless-stopped
     environment:
       - WEATHER_API_KEY=8a373f54eb  # API-sleutel als environment variabele

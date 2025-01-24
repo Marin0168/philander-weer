@@ -1,19 +1,24 @@
 FROM python:3.11-slim
 
-# Stel de werkdirectory in
+# Install dependencies for LightGBM and Python
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libgomp1 \
+    && apt-get clean
+
+# Set the working directory
 WORKDIR /app
 
-# Kopieer de requirements file naar de container
-COPY requirements.txt /app/requirements.txt
-COPY ./models /app/models
-COPY ./static /app/static
-COPY ./templates /app/templates
+# Copy project files to the container
+COPY ./requirements.txt /app/
+COPY ./organized_server_script_v2.6.py /app/
+COPY ./models /app/models/
+COPY ./static /app/static/
+COPY ./templates /app/templates/
+COPY ./historical_weather_data.csv /app/
 
-# Installeer afhankelijkheden
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Kopieer de rest van de applicatie
-COPY . /app
-
-# Start het script
-CMD ["python", "organized_server_script_v2.6.py"]
+# Run the script
+CMD ["python", "/app/organized_server_script_v2.6.py"]

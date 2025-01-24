@@ -16,7 +16,7 @@ COPY ./models /app/models/
 COPY ./static /app/static/
 COPY ./templates /app/templates/
 COPY ./historical_weather_data.csv /app/
-
+COPY ./requirements.txt /app/requirements.txt
 # Install Python dependencies
 RUN pip install --no-cache-dir -r /app/requirements.txt
 

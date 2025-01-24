@@ -11,5 +11,6 @@ services:
       - ../static:/app/static
       - ../templates:/app/templates
       - ../historical_weather_data.csv:/app/historical_weather_data.csv
+      - ../organized_server_script_v2.6.py:/app/organized_server_script_v2.6.py
     environment:
-      - WEATHER_API_KEY=your_api_key  # API-sleutel als environment variabele
+      - WEATHER_API_KEY=8a373f54eb  # API-sleutel als environment variabele

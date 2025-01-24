@@ -4,4 +4,5 @@ requests
 pandas
 flask
 flask-cors
-sklearn
+scikit-learn
+

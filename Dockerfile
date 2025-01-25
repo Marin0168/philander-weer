@@ -21,4 +21,4 @@ COPY ./requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Run the script
-CMD ["python", "/app/organized_server_script_v2.6.py"]
+CMD ["python", "/app/organized_server_script_v2.7.py"]

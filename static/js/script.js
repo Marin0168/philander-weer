@@ -1,8 +1,45 @@
+// Initialiseer de kaart
 const map = L.map('map').setView([52.3676, 4.9041], 6); // Start in Amsterdam
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
+// Haal route-informatie op en teken de route
+async function drawRoute() {
+    const response = await fetch('/route', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+
+    const data = await response.json();
+
+    // Loop door de routepunten en teken lijnen
+    data.forEach(segment => {
+        if (segment.error) {
+            console.error(`Fout voor segment ${segment.start.name} naar ${segment.end.name}: ${segment.error}`);
+            return;
+        }
+
+        // Start- en eindcoördinaten
+        const startCoords = segment.start.location.split(',').map(Number);
+        const endCoords = segment.end.location.split(',').map(Number);
+
+        // Voeg polyline toe met dynamische kleur
+        L.polyline([startCoords, endCoords], { color: segment.color })
+            .addTo(map)
+            .bindPopup(`
+                <strong>Van:</strong> ${segment.start.name}<br>
+                <strong>Tot:</strong> ${segment.end.name}<br>
+                <strong>Cloud Base:</strong> ${segment.cloud_base} m<br>
+                <strong>Kleur:</strong> ${segment.color}
+            `);
+    });
+}
+
+// Roep de functie aan om de route te tekenen
+drawRoute();
+
+// Logica voor kaartklik om voorspellingen te tonen
 map.on('click', async function (e) {
     const { lat, lng } = e.latlng;
     const resultDiv = document.getElementById('result');

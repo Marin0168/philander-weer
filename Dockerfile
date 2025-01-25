@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Copy project files to the container
 COPY ./requirements.txt /app/
-COPY ./organized_server_script_v2.6.py /app/
+COPY ./organized_server_script_v2.7.py /app/
 COPY ./models /app/models/
 COPY ./static /app/static/
 COPY ./templates /app/templates/

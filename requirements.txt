@@ -4,5 +4,4 @@ requests
 pandas
 flask
 flask-cors
-scikit-learn
-
+scikit-learn==1.6.0  # Specificeer hier de versie

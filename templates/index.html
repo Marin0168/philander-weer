@@ -1,23 +1,53 @@
 <!DOCTYPE html>
-<html lang="nl">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactieve Weerkaart</title>
+    <title>Interactieve Routekaart</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="static/css/style.css" />
-    <!-- Java Script -->
-    <script src="static/js/script.js" defer></script>
-</head>
-
-<body>
-    <h1>Interactieve Weerkaart</h1>
-    <p>Klik op de kaart om een locatie te selecteren en het weer te voorspellen.</p>
-    <div id="map"></div>
-    <div id="result"></div>
-
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-</body>
+    <style>
+        #map { height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        // Kaart initialiseren
+        const map = L.map('map').setView([52.0, 5.0], 6);
 
+        // Voeg OpenStreetMap tiles toe
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Haal de route-informatie op van de server
+        fetch('/route', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Loop door de routepunten
+            data.forEach(segment => {
+                if (segment.error) {
+                    console.error(`Error for segment ${segment.start.name} to ${segment.end.name}: ${segment.error}`);
+                    return;
+                }
+
+                // Teken de lijn tussen twee punten
+                const startCoords = segment.start.location.split(',').map(Number);
+                const endCoords = segment.end.location.split(',').map(Number);
+
+                L.polyline([startCoords, endCoords], { color: segment.color })
+                    .addTo(map)
+                    .bindPopup(`
+                        <strong>Van:</strong> ${segment.start.name}<br>
+                        <strong>Tot:</strong> ${segment.end.name}<br>
+                        <strong>Cloud Base:</strong> ${segment.cloud_base} m<br>
+                        <strong>Kleur:</strong> ${segment.color}
+                    `);
+            });
+        })
+        .catch(err => console.error('Fout bij ophalen van routegegevens:', err));
+    </script>
+</body>
 </html>

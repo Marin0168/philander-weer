@@ -1,0 +1,12 @@
+networks:
+  dockernet:
+    external: true
+services:
+  philander-weerapp:
+    image: philander-weerapp:V1
+    container_name: philander-weerapp
+    networks:
+      - dockernet
+    restart: unless-stopped
+    environment:
+      - WEATHER_API_KEY=8a373f54eb  # API-sleutel als environment variabele

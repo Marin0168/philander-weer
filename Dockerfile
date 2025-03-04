@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Copy project files to the container
 COPY ./requirements.txt /app/
-COPY ./organized_server_script_v2.8.py /app/
+COPY ./organized_server_script_v2.6.py /app/
 COPY ./models /app/models/
 COPY ./static /app/static/
 COPY ./templates /app/templates/
@@ -21,4 +21,4 @@ COPY ./requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Run the script
-CMD ["python", "/app/organized_server_script_v2.8.py"]
+CMD ["python", "/app/organized_server_script_v2.6.py"]

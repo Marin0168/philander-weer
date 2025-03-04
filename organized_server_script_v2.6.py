@@ -135,6 +135,12 @@ def predict_weather(location):
 def index():
     return render_template('index.html')
 
+@app.route('/privacybeleid')
+def index():
+    return render_template('privacybeleid.html')
+
+
+
 
 @app.route('/predict', methods=['POST'])
 def predict():

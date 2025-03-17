@@ -1,6 +1,9 @@
+version: "3.7"
+
 networks:
   dockernet:
     external: true
+
 services:
   philander-weerapp:
     image: philander-weerapp:V1

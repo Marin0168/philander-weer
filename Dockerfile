@@ -15,7 +15,6 @@ COPY ./organized_server_script_v2.6.py /app/
 COPY ./models /app/models/
 COPY ./static /app/static/
 COPY ./templates /app/templates/
-COPY ./templates/privacybeleid.html /app/templates/
 COPY ./historical_weather_data.csv /app/
 COPY ./requirements.txt /app/requirements.txt
 # Install Python dependencies

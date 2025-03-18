@@ -8,11 +8,11 @@ from flask_cors import CORS
 
 # Instellingen en configuraties
 app = Flask(__name__)
-CORS(app)  # Cross-Origin Resource Sharing support
+CORS(app)
 logging.basicConfig(level=logging.INFO)
 
 # API-configuratie
-API_KEY = os.getenv("WEATHER_API_KEY", "8a373f54eb")  # Gebruik environment variabelen
+API_KEY = os.getenv("WEATHER_API_KEY", "8a373f54eb")
 BASE_WEATHER_URL = "https://weerlive.nl/api/weerlive_api_v2.php"
 
 # Laad de modellen met foutafhandeling
@@ -41,99 +41,72 @@ def synchronize_features(input_data, expected_features):
             input_data[feature] = 0  # Voeg ontbrekende kolom toe met standaardwaarde
     return input_data[expected_features]
 
+# Functies (ongewijzigd)
+def get_expected_features(model):
+    return getattr(model, 'feature_names_in_', None)
 
-# Functies
+def synchronize_features(input_data, expected_features):
+    for feature in expected_features:
+        if feature not in input_data.columns:
+            input_data[feature] = 0
+    return input_data[expected_features]
+
 def fetch_real_time_weather(location):
-    """
-    Haalt real-time weerdata op voor een opgegeven locatie en voegt samengestelde features toe.
-    """
     params = {"key": API_KEY, "locatie": location}
     response = requests.get(BASE_WEATHER_URL, params=params)
     if response.status_code == 200:
-        try:
-            data = response.json().get('liveweer', [])[0]
-            
-            # Basisgegevens uit API
-            weather_data = {
-                'RH': float(data.get('neerslag', 0.0)),
-                'PG': float(data.get('luchtd', 0.0)),
-                'FHN': float(data.get('windsnelheid', 0.0)),
-                'FXX': float(data.get('windstoten', 0.0)),
-                'DDVEC': float(data.get('windrgr', 0.0)),
-                'Q': float(data.get('zon', 0.0)),
-                'UX': float(data.get('lv', 0.0)),
-                'TN': float(data.get('temp', 0.0)),
-                'TG': float(data.get('temp24', 0.0)),
-                'temperature_2m': float(data.get('temp', 0.0)),
-                'relative_humidity_2m': float(data.get('lv', 0.0)),
-                'wind_speed_10m': float(data.get('windsnelheid', 0.0)),
-                'wind_direction_10m': float(data.get('windrgr', 0.0)),
-                'dew_point': float(data.get('dauwp', 0.0)),
-                'temperature_diff': 0.0,  # Placeholder voor enkel datapunt
-                'humidity_diff': 0.0,  # Placeholder
-                'turbulence': 0.0,  # Placeholder
-                'month': pd.Timestamp.now().month,
-            }
-
-            # Voeg seizoensinformatie toe
-            weather_data['season'] = pd.Series(weather_data['month']).map({
-                12: 'winter', 1: 'winter', 2: 'winter',
-                3: 'spring', 4: 'spring', 5: 'spring',
-                6: 'summer', 7: 'summer', 8: 'summer',
-                9: 'autumn', 10: 'autumn', 11: 'autumn'
-            }).iloc[0]  # Map month to season
-
-            # Converteer seizoensinformatie naar one-hot encoding
-            weather_df = pd.DataFrame([weather_data])
-            weather_df = pd.get_dummies(weather_df, columns=['season'], drop_first=True)
-
-            # Zorg dat alle seizoenskolommen aanwezig zijn
-            for season in ['season_spring', 'season_summer', 'season_autumn']:
-                if season not in weather_df.columns:
-                    logging.warning(f"Kolom {season} ontbreekt; toegevoegd met standaardwaarde 0.")
-                    weather_df[season] = 0
-
-            return weather_df.iloc[0].to_dict()  # Zet terug naar dictionary
-        except (KeyError, IndexError) as e:
-            raise Exception("Fout bij het verwerken van de weerdata.") from e
+        data = response.json().get('liveweer', [])[0]
+        weather_data = {
+            'RH': float(data.get('neerslag', 0.0)),
+            'PG': float(data.get('luchtd', 0.0)),
+            'FHN': float(data.get('windsnelheid', 0.0)),
+            'FXX': float(data.get('windstoten', 0.0)),
+            'DDVEC': float(data.get('windrgr', 0.0)),
+            'Q': float(data.get('zon', 0.0)),
+            'UX': float(data.get('lv', 0.0)),
+            'TN': float(data.get('temp', 0.0)),
+            'TG': float(data.get('temp24', 0.0)),
+            'temperature_2m': float(data.get('temp', 0.0)),
+            'relative_humidity_2m': float(data.get('lv', 0.0)),
+            'wind_speed_10m': float(data.get('windsnelheid', 0.0)),
+            'wind_direction_10m': float(data.get('windrgr', 0.0)),
+            'dew_point': float(data.get('dauwp', 0.0)),
+            'temperature_diff': 0.0,
+            'humidity_diff': 0.0,
+            'turbulence': 0.0,
+            'month': pd.Timestamp.now().month,
+        }
+        weather_data['season'] = pd.Series(weather_data['month']).map({
+            12: 'winter', 1: 'winter', 2: 'winter',
+            3: 'spring', 4: 'spring', 5: 'spring',
+            6: 'summer', 7: 'summer', 8: 'summer',
+            9: 'autumn', 10: 'autumn', 11: 'autumn'
+        }).iloc[0]
+        weather_df = pd.DataFrame([weather_data])
+        weather_df = pd.get_dummies(weather_df, columns=['season'], drop_first=True)
+        for season in ['season_spring', 'season_summer', 'season_autumn']:
+            if season not in weather_df.columns:
+                weather_df[season] = 0
+        return weather_df.iloc[0].to_dict()
     else:
         raise Exception(f"Fout bij het ophalen van weerdata: {response.status_code}")
 
-
 def predict_weather(location):
-    """
-    Voorspelt VVN, VVX en de wolkenbasis op basis van real-time weerdata.
-    """
     real_time_data = fetch_real_time_weather(location)
     input_data = pd.DataFrame([real_time_data])
-
-    # Features per model
-    vvn_expected_features = get_expected_features(vvn_model)
-    vvx_expected_features = get_expected_features(vvx_model)
-    cloud_base_expected_features = get_expected_features(cloud_base_model)
-
-    # Synchroniseer invoerdata met de verwachte features
-    vvn_input = synchronize_features(input_data, vvn_expected_features)
-    vvx_input = synchronize_features(input_data, vvx_expected_features)
-    cloud_base_input = synchronize_features(input_data, cloud_base_expected_features)
-
-    # Voorspellingen maken
-    vvn_prediction = vvn_model.predict(vvn_input)[0]
-    vvx_prediction = vvx_model.predict(vvx_input)[0]
-    cloud_base_prediction = cloud_base_model.predict(cloud_base_input)[0]
-
+    vvn_input = synchronize_features(input_data, get_expected_features(vvn_model))
+    vvx_input = synchronize_features(input_data, get_expected_features(vvx_model))
+    cloud_base_input = synchronize_features(input_data, get_expected_features(cloud_base_model))
     return {
-        "VVN": vvn_prediction,
-        "VVX": vvx_prediction,
-        "cloud_base": cloud_base_prediction
+        "VVN": vvn_model.predict(vvn_input)[0],
+        "VVX": vvx_model.predict(vvx_input)[0],
+        "cloud_base": cloud_base_model.predict(cloud_base_input)[0]
     }
 
-
-# Routes
+# Routes (inclusief route-definitie)
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -141,13 +114,34 @@ def predict():
     location = data.get('location')
     if not location:
         return jsonify({"error": "No location provided"}), 400
+    predictions = predict_weather(location)
+    return jsonify(predictions)
 
-    try:
-        predictions = predict_weather(location)
-        return jsonify(predictions)
-    except Exception as e:
-        logging.error(f"Voorspelling mislukt: {e}")
-        return jsonify({"error": str(e)}), 500
+@app.route('/route', methods=['POST'])
+def calculate_route():
+    route_points = [
+        {'name': 'Nordhorn', 'location': '52.4300,7.0700'},
+        {'name': 'Den Bosch', 'location': '51.6900,5.3100'},
+        {'name': 'Oostkapelle', 'location': '51.5600,3.5500'},
+        {'name': 'GILTI', 'location': '51.0900,1.4000'},
+        {'name': 'Duxford', 'location': '52.0900,0.1300'}
+    ]
+    results = []
+    for i in range(len(route_points) - 1):
+        start = route_points[i]
+        end = route_points[i + 1]
+        prediction = predict_weather(start['location'])
+        cloud_base_value = prediction['cloud_base'] * 100
+        color = 'green' if cloud_base_value >= 600 else 'orange' if cloud_base_value >= 300 else 'red'
+        results.append({
+            'start': start,
+            'end': end,
+            'VVN': prediction['VVN'],
+            'VVX': prediction['VVX'],
+            'cloud_base': cloud_base_value,
+            'color': color
+        })
+    return jsonify(results)
 
 # -------------------------------
 # Nieuwe route voor privacy.html

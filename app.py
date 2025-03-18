@@ -152,7 +152,7 @@ def predict():
 # -------------------------------
 # Nieuwe route voor privacy.html
 # -------------------------------
-@app.route('/privacy.html')
+@app.route('/privacybeleid')
 def privacy():
     """
     Deze route toont de privacyverklaring via het template privacy.html.

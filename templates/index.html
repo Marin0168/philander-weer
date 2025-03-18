@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactieve Routekaart (Luchtvaart)</title>
+    <title>Interactieve Routekaart</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <style>
@@ -11,13 +11,12 @@
 <body>
     <div id="map"></div>
     <script>
-        // Kaart initialiseren met OpenFlightMaps tiles
+        // Kaart initialiseren
         const map = L.map('map').setView([52.0, 5.0], 6);
 
-        L.tileLayer('https://tileserver.openflightmaps.org/live/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenFlightMaps contributors',
-            minZoom: 6,
-            maxZoom: 14
+        // Voeg OpenStreetMap tiles toe
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
         // Haal de route-informatie op van de server
@@ -38,7 +37,7 @@
                 const startCoords = segment.start.location.split(',').map(Number);
                 const endCoords = segment.end.location.split(',').map(Number);
 
-                L.polyline([startCoords, endCoords], { color: segment.color, weight: 3, opacity: 0.8 })
+                L.polyline([startCoords, endCoords], { color: segment.color })
                     .addTo(map)
                     .bindPopup(`
                         <strong>Van:</strong> ${segment.start.name}<br>

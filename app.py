@@ -6,9 +6,7 @@ import pandas as pd
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
-# -------------------------------------------------------
 # Instellingen en configuraties
-# -------------------------------------------------------
 app = Flask(__name__)
 CORS(app)  # Cross-Origin Resource Sharing support
 logging.basicConfig(level=logging.INFO)
@@ -17,20 +15,15 @@ logging.basicConfig(level=logging.INFO)
 API_KEY = os.getenv("WEATHER_API_KEY", "8a373f54eb")  # Gebruik environment variabelen
 BASE_WEATHER_URL = "https://weerlive.nl/api/weerlive_api_v2.php"
 
-# -------------------------------------------------------
-# Models laden (met foutafhandeling)
-# -------------------------------------------------------
+# Laad de modellen met foutafhandeling
 try:
-    vvn_model = joblib.load("best_vvn_model.pkl")
-    vvx_model = joblib.load("best_vvx_model.pkl")
-    cloud_base_model = joblib.load("best_wolkenbasis_model.pkl")
+    vvn_model = joblib.load("models/best_vvn_model.pkl")
+    vvx_model = joblib.load("models/best_vvx_model.pkl")
+    cloud_base_model = joblib.load("models/best_wolkenbasis_model.pkl")
 except FileNotFoundError as e:
     logging.error("Modelbestanden niet gevonden! Zorg ervoor dat de modelbestanden bestaan.")
     raise SystemExit("Fout: Modelbestanden niet geladen.") from e
 
-# -------------------------------------------------------
-# Hulpfuncties
-# -------------------------------------------------------
 def get_expected_features(model):
     """
     Haalt de verwachte feature-namen op van een model.
@@ -48,6 +41,8 @@ def synchronize_features(input_data, expected_features):
             input_data[feature] = 0  # Voeg ontbrekende kolom toe met standaardwaarde
     return input_data[expected_features]
 
+
+# Functies
 def fetch_real_time_weather(location):
     """
     Haalt real-time weerdata op voor een opgegeven locatie en voegt samengestelde features toe.
@@ -57,7 +52,7 @@ def fetch_real_time_weather(location):
     if response.status_code == 200:
         try:
             data = response.json().get('liveweer', [])[0]
-
+            
             # Basisgegevens uit API
             weather_data = {
                 'RH': float(data.get('neerslag', 0.0)),
@@ -75,35 +70,35 @@ def fetch_real_time_weather(location):
                 'wind_direction_10m': float(data.get('windrgr', 0.0)),
                 'dew_point': float(data.get('dauwp', 0.0)),
                 'temperature_diff': 0.0,  # Placeholder voor enkel datapunt
-                'humidity_diff': 0.0,     # Placeholder
-                'turbulence': 0.0,        # Placeholder
+                'humidity_diff': 0.0,  # Placeholder
+                'turbulence': 0.0,  # Placeholder
                 'month': pd.Timestamp.now().month,
             }
 
-            # Seizoensinformatie toevoegen
+            # Voeg seizoensinformatie toe
             weather_data['season'] = pd.Series(weather_data['month']).map({
                 12: 'winter', 1: 'winter', 2: 'winter',
                 3: 'spring', 4: 'spring', 5: 'spring',
                 6: 'summer', 7: 'summer', 8: 'summer',
                 9: 'autumn', 10: 'autumn', 11: 'autumn'
-            }).iloc[0]
+            }).iloc[0]  # Map month to season
 
-            # Omzetten naar DataFrame voor verdere verwerking
+            # Converteer seizoensinformatie naar one-hot encoding
             weather_df = pd.DataFrame([weather_data])
             weather_df = pd.get_dummies(weather_df, columns=['season'], drop_first=True)
 
-            # Zekerstellen dat seizoenskolommen aanwezig zijn
+            # Zorg dat alle seizoenskolommen aanwezig zijn
             for season in ['season_spring', 'season_summer', 'season_autumn']:
                 if season not in weather_df.columns:
                     logging.warning(f"Kolom {season} ontbreekt; toegevoegd met standaardwaarde 0.")
                     weather_df[season] = 0
 
-            return weather_df.iloc[0].to_dict()
-
+            return weather_df.iloc[0].to_dict()  # Zet terug naar dictionary
         except (KeyError, IndexError) as e:
             raise Exception("Fout bij het verwerken van de weerdata.") from e
     else:
         raise Exception(f"Fout bij het ophalen van weerdata: {response.status_code}")
+
 
 def predict_weather(location):
     """
@@ -133,9 +128,8 @@ def predict_weather(location):
         "cloud_base": cloud_base_prediction
     }
 
-# -------------------------------------------------------
-# Flask routes
-# -------------------------------------------------------
+
+# Routes
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -155,67 +149,18 @@ def predict():
         logging.error(f"Voorspelling mislukt: {e}")
         return jsonify({"error": str(e)}), 500
 
-
-@app.route('/route', methods=['POST'])
-def calculate_route():
-    """
-    Bereken modelresultaten voor de route en geef deze terug inclusief kleurcodering.
-    """
-    route_points = [
-        {'name': 'Nordhorn', 'location': '52.4300,7.0700'},
-        {'name': 'Den Bosch', 'location': '51.6900,5.3100'},
-        {'name': 'Oostkapelle', 'location': '51.5600,3.5500'},
-        {'name': 'GILTI', 'location': '51.0900,1.4000'},
-        {'name': 'Duxford', 'location': '52.0900,0.1300'}
-    ]
-
-    results = []
-    for i in range(len(route_points) - 1):
-        start = route_points[i]
-        end = route_points[i + 1]
-
-        try:
-            prediction = predict_weather(start['location'])
-            cloud_base_value = prediction['cloud_base'] * 100
-
-            # Bepaal kleur op basis van cloud_base waarde
-            if cloud_base_value < 300:
-                color = 'red'
-            elif 300 <= cloud_base_value < 600:
-                color = 'orange'
-            else:
-                color = 'green'
-
-            results.append({
-                'start': {'name': start['name'], 'location': start['location']},
-                'end': {'name': end['name'], 'location': end['location']},
-                'VVN': prediction['VVN'],
-                'VVX': prediction['VVX'],
-                'cloud_base': cloud_base_value,
-                'color': color
-            })
-        except Exception as e:
-            results.append({
-                'start': {'name': start['name'], 'location': start['location']},
-                'end': {'name': end['name'], 'location': end['location']},
-                'error': str(e)
-            })
-
-    return jsonify(results)
-
-# -------------------------------------------------------
-# Nieuwe route voor het privacybeleid
-# -------------------------------------------------------
+# -------------------------------
+# Nieuwe route voor privacy.html
+# -------------------------------
 @app.route('/privacy.html')
 def privacy():
     """
     Deze route toont de privacyverklaring via het template privacy.html.
-    Zorg dat je templates/privacy.html aanwezig is met de juiste inhoud.
+    Zorg ervoor dat 'templates/privacy.html' aanwezig is met de juiste inhoud.
     """
     return render_template('privacy.html')
 
-# -------------------------------------------------------
+
 # Main
-# -------------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)

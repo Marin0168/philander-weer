@@ -1,27 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactieve Luchtvaart Routekaart (OpenAIP)</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactieve Weerkaart met Kaartwisselaar</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         #map { height: 100vh; }
+        .leaflet-top.leaflet-left {
+            top: 70px;
+        }
     </style>
 </head>
 <body>
+    <h1>Interactieve Weerkaart</h1>
+    <p>Klik op de kaart om een locatie te selecteren en het weer te voorspellen.</p>
     <div id="map"></div>
+    <div id="result"></div>
 
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        const map = L.map('map').setView([51.5012, 3.7597], 7);
+        const apiKey = "a4ae995451d331c23b5a6c7662a4cd7a";
 
-        const apiKey = "a4ae995451d331c23b5a6c7662a4cd7a";  // OpenAIP API-key
+        const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        });
 
-        L.tileLayer(`https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=${apiKey}`, {
+        const openAIP = L.tileLayer(`https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=${apiKey}`, {
             attribution: '&copy; <a href="https://www.openaip.net">OpenAIP contributors</a>',
             maxZoom: 14,
             minZoom: 6,
             subdomains: ['a', 'b', 'c'],
-        }).addTo(map);
+        });
+
+        const map = L.map('map', {
+            center: [51.5012, 3.7597],
+            zoom: 7,
+            layers: [openStreetMap]
+        });
+
+        const baseMaps = {
+            "Interactieve kaart": openStreetMap,
+            "OpenAIP Luchtvaartkaart": openAIP
+        };
+
+        L.control.layers(baseMaps).addTo(map);
 
         fetch('/route', {
             method: 'POST',

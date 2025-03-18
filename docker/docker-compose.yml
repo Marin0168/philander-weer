@@ -1,15 +1,16 @@
-version: "3.7"
-
-networks:
-  dockernet:
-    external: true
+version: '3.7'
 
 services:
   philander-weerapp:
+    build: ~/docker/philander-weer
     image: philander-weerapp:V1
     container_name: philander-weerapp
     networks:
       - dockernet
     restart: unless-stopped
     environment:
-      - WEATHER_API_KEY=8a373f54eb  # API-sleutel als environment variabele
+      - WEATHER_API_KEY=8a373f54eb
+
+networks:
+  dockernet:
+    external: true

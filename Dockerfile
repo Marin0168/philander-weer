@@ -11,14 +11,14 @@ WORKDIR /app
 
 # Copy project files to the container
 COPY ./requirements.txt /app/
-COPY ./organized_server_script_v2.6_metprivacy.py /app/
+COPY ./app.py /app/
 COPY ./models /app/models/
 COPY ./static /app/static/
 COPY ./templates /app/templates/
 COPY ./historical_weather_data.csv /app/
-COPY ./requirements.txt /app/requirements.txt
+
 # Install Python dependencies
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Run the script
-CMD ["python", "/app/organized_server_script_v2.6_metprivacy.py"]
+CMD ["python", "/app/app.py"]

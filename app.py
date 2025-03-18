@@ -158,7 +158,7 @@ def privacy():
     Deze route toont de privacyverklaring via het template privacy.html.
     Zorg ervoor dat 'templates/privacy.html' aanwezig is met de juiste inhoud.
     """
-    return render_template('privacy.html')
+    return render_template('privacybeleid.html')
 
 
 # Main

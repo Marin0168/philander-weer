@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactieve Routekaart (Luchtvaart)</title>
+    <title>Interactieve Luchtvaart Routekaart (OpenAIP)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <style>
@@ -11,15 +11,19 @@
 <body>
     <div id="map"></div>
     <script>
-        const map = L.map('map').setView([52.0, 5.0], 7);
+        // Kaart initialiseren
+        const map = L.map('map').setView([51.5012, 3.7597], 7);
 
-        L.tileLayer('https://nwy-tiles-api.prod.newaydata.com/tiles/{z}/{x}/{y}.jpg', {
-            attribution: '&copy; OpenFlightMaps contributors',
-            minZoom: 6,
-            maxZoom: 12
+        // Voeg OpenAIP luchtvaartkaart tiles toe
+        L.tileLayer('https://{s}.tile.maps.openaip.net/geowebcache/service/tms/1.0.0/openaip_basemap@png/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenAIP contributors',
+            subdomains: ['a', 'b', 'c'],
+            tms: true,
+            maxZoom: 14,
+            minZoom: 6
         }).addTo(map);
 
-        // Route ophalen en tekenen
+        // Haal de route-informatie op van de server
         fetch('/route', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }

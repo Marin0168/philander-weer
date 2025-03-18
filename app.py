@@ -121,9 +121,29 @@ def predict():
 def calculate_route():
     route_points = [
         {'name': 'Nordhorn', 'location': '52.4300,7.0700'},
+        {'name': 'Oldenzaal', 'location': '52.3000,6.9300'},
+        {'name': 'Knooppunt Azelo', 'location': '52.2700,6.6300'},
+        {'name': 'Lochem', 'location': '52.1600,6.4200'},
+        {'name': 'Valeplas', 'location': '51.9000,5.9000'},
+        {'name': 'Waalbrug A50 bij Ewijk', 'location': '51.8600,5.7500'},
+        {'name': 'Knooppunt Paalgraven A50 - A59', 'location': '51.7400,5.6000'},
         {'name': 'Den Bosch', 'location': '51.6900,5.3100'},
+        {'name': 'Efteling', 'location': '51.6550,5.0460'},
+        {'name': 'Keizersveerbrug A27', 'location': '51.7360,4.9010'},
+        {'name': 'Moerdijkbrug A16', 'location': '51.7010,4.6320'},
+        {'name': 'Haringvlietbrug A29', 'location': '51.7330,4.4160'},
+        {'name': 'Grevelingen Dam', 'location': '51.7510,3.8840'},
+        {'name': 'Zeeland Brug', 'location': '51.6620,3.8530'},
+        {'name': 'Neeltje Jans', 'location': '51.6260,3.7000'},
         {'name': 'Oostkapelle', 'location': '51.5600,3.5500'},
+        {'name': 'Oostkapelle-1', 'location': '51.4450,3.5125'},
+        {'name': 'Oostkapelle-2', 'location': '51.3300,3.4750'},
+        {'name': 'Oostkapelle-3', 'location': '51.2150,3.4375'},
         {'name': 'GILTI', 'location': '51.0900,1.4000'},
+        {'name': 'Canterbury', 'location': '51.2800,1.0800'},
+        {'name': 'Southend-on-Sea', 'location': '51.5370,0.7130'},
+        {'name': 'Witham', 'location': '51.7980,0.6390'},
+        {'name': 'Braintree', 'location': '51.8790,0.5510'},
         {'name': 'Duxford', 'location': '52.0900,0.1300'}
     ]
     results = []

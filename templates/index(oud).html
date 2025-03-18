@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactieve Routekaart (Luchtvaart)</title>
+    <title>Interactieve Routekaart</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <style>
@@ -11,31 +11,33 @@
 <body>
     <div id="map"></div>
     <script>
-        const map = L.map('map').setView([52.0, 5.0], 7);
+        // Kaart initialiseren
+        const map = L.map('map').setView([52.0, 5.0], 6);
 
-        L.tileLayer('https://nwy-tiles-api.prod.newaydata.com/tiles/{z}/{x}/{y}.jpg', {
-            attribution: '&copy; OpenFlightMaps contributors',
-            minZoom: 6,
-            maxZoom: 12
+        // Voeg OpenStreetMap tiles toe
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // Route ophalen en tekenen
+        // Haal de route-informatie op van de server
         fetch('/route', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         })
         .then(response => response.json())
         .then(data => {
+            // Loop door de routepunten
             data.forEach(segment => {
                 if (segment.error) {
                     console.error(`Error for segment ${segment.start.name} to ${segment.end.name}: ${segment.error}`);
                     return;
                 }
 
+                // Teken de lijn tussen twee punten
                 const startCoords = segment.start.location.split(',').map(Number);
                 const endCoords = segment.end.location.split(',').map(Number);
 
-                L.polyline([startCoords, endCoords], { color: segment.color, weight: 3, opacity: 0.8 })
+                L.polyline([startCoords, endCoords], { color: segment.color })
                     .addTo(map)
                     .bindPopup(`
                         <strong>Van:</strong> ${segment.start.name}<br>

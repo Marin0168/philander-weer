@@ -174,6 +174,14 @@ def privacy():
     """
     return render_template('privacybeleid.html')
 
+@app.route('/google3000da14148dd0e4')
+def google():
+    """
+    Deze route verwerkt de POST-aanvraag van de privacyverklaring.
+    Voer hier de logica uit om de acceptatie van de privacyverklaring op te slaan.
+    """
+    return render_template('google3000da14148dd0e4.html')
+
 
 # Main
 if __name__ == "__main__":

@@ -174,7 +174,7 @@ def privacy():
     """
     return render_template('privacybeleid.html')
 
-@app.route('/google')
+@app.route('/google/')
 def google():
     """
     Deze route verwerkt de POST-aanvraag van de privacyverklaring.
